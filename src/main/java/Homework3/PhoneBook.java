@@ -41,7 +41,7 @@ public class PhoneBook {
     }
 
     public static void main(String[] args) {
-        PhoneBook phoneBook = new PhoneBook("Шевченко", "+7(945)044-22-18");
+        PhoneBook phoneBook = new PhoneBook(/*"Шевченко", "+7(945)044-22-18"*/);
         phoneBook.add("Сурикян", "+7(910)453-25-23");
         phoneBook.add("Васильев", "+7(955)453-23-25");
         phoneBook.add("Аркадийчев", "+7(983)442-12-53");
@@ -57,5 +57,6 @@ public class PhoneBook {
         phoneBook.get("Сурикян");
         phoneBook.get("Аркадийчев");
         phoneBook.get("Васильев");
+        phoneBook.get("Шевченко");
     }
 }
