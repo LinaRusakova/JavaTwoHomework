@@ -8,10 +8,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 
 public class Controller {
 
@@ -27,7 +23,7 @@ public class Controller {
 
     public void initialize() {
 
-        //Введеные вручную данные для проверки работы, от этого блока впоследствии надо избавиться
+        /* Введеные вручную данные для проверки работы, от этого блока впоследствии надо избавиться */
         ObservableList<Contact> contacts = FXCollections.observableArrayList(
                 new Contact("Mama"),
                 new Contact("Papa"),
@@ -41,43 +37,53 @@ public class Controller {
             contactList.add(contact.getName());
         }
 
-        contacts.get(0).addMessage("Привет!", getCurrentDate());
-        contacts.get(1).addMessage("Как дела?", getCurrentDate());
-        contacts.get(2).addMessage("Ты тут?", getCurrentDate());
-        contacts.get(3).addMessage("Дай денег, плз, зарплату задерживают, а мелкой надо штаны зимние купить.", getCurrentDate());
-        //Конец данных инициализации
+        contacts.get(0).addMessage("Привет!");
+        contacts.get(1).addMessage("Как дела?");
+        contacts.get(2).addMessage("Ты тут?");
+        contacts.get(3).addMessage("Дай денег, плз, зарплату задерживают, а мелкой надо штаны зимние купить.");
+        /* Конец данных инициализации */
 
         chatsList.setItems(contactList);
 
         chatsList.getSelectionModel().selectFirst();
 
         chatArea.setItems(contacts.get(getCurrentContactIndex()).getMessages());
+        selectLastMessage();
 
-        chatsList.setOnMouseClicked(event -> chatArea.setItems(contacts.get(getCurrentContactIndex()).getMessages()));
+        chatsList.setOnMouseClicked(event -> {
+            chatArea.setItems(contacts.get(getCurrentContactIndex()).getMessages());
+            focusLastMessage();
+        });
 
         sendButton.setOnAction(event -> {
             sendMessage(contacts);
         });
+
         userMessage.setOnKeyPressed(event -> {
             if (event.getCode().equals(KeyCode.ENTER)) {
                 sendMessage(contacts);
             }
         });
+    }
 
+    private void focusLastMessage() {
+        selectLastMessage();
+        chatArea.scrollTo(chatArea.getSelectionModel().getSelectedIndex());
+    }
+
+    private void selectLastMessage() {
+        chatArea.getSelectionModel().selectLast();
     }
 
     private void sendMessage(ObservableList<Contact> contacts) {
         if (userMessage.getText().length() > 0) {
-            contacts.get(getCurrentContactIndex()).addMessage("You", userMessage.getText(), getCurrentDate());
+            contacts.get(getCurrentContactIndex()).addMessage("You", userMessage.getText());
             userMessage.clear();
+            focusLastMessage();
         }
     }
 
     private int getCurrentContactIndex() {
         return chatsList.getSelectionModel().getSelectedIndex();
-    }
-
-    private String getCurrentDate() {
-        return DateTimeFormatter.ofPattern("dd-MM-yy hh:mm:ss").format(LocalDateTime.now());
     }
 }
