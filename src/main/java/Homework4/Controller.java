@@ -48,7 +48,7 @@ public class Controller {
         chatsList.getSelectionModel().selectFirst();
 
         chatArea.setItems(contacts.get(getCurrentContactIndex()).getMessages());
-        selectLastMessage();
+        focusLastMessage();
 
         chatsList.setOnMouseClicked(event -> {
             chatArea.setItems(contacts.get(getCurrentContactIndex()).getMessages());
@@ -67,12 +67,8 @@ public class Controller {
     }
 
     private void focusLastMessage() {
-        selectLastMessage();
-        chatArea.scrollTo(chatArea.getSelectionModel().getSelectedIndex());
-    }
-
-    private void selectLastMessage() {
         chatArea.getSelectionModel().selectLast();
+        chatArea.scrollTo(chatArea.getSelectionModel().getSelectedIndex());
     }
 
     private void sendMessage(ObservableList<Contact> contacts) {
