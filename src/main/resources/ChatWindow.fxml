@@ -7,23 +7,20 @@
 <?import javafx.scene.layout.Pane?>
 
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Homework4.Controller">
-   <children>
-      <Pane layoutY="360.0" prefHeight="40.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="360.0">
-         <children>
-            <TextField fx:id="userMessage" layoutX="14.0" layoutY="8.0" prefHeight="25.0" prefWidth="505.0" />
-            <Button fx:id="sendButton" layoutX="534.0" layoutY="8.0" mnemonicParsing="false" text="Send &gt;" />
-         </children>
-      </Pane>
-      <Pane prefHeight="320.0" prefWidth="191.0" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="400.0" AnchorPane.topAnchor="0.0">
-         <children>
-            <ListView fx:id="chatsList" prefHeight="360.0" prefWidth="200.0" />
-         </children>
-      </Pane>
-      <Pane layoutX="200.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="200.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-         <children>
-            <ListView fx:id="chatArea" prefHeight="360.0" prefWidth="400.0"/>
-         </children>
-      </Pane>
-   </children>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0"
+            prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="Homework4.Controller">
+   <Pane layoutY="360.0" prefHeight="40.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+         AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="360.0">
+      <TextField fx:id="userMessage" layoutX="14.0" layoutY="8.0" prefHeight="25.0" prefWidth="505.0"/>
+      <Button fx:id="sendButton" layoutX="534.0" layoutY="8.0" mnemonicParsing="false" text="Send &gt;"/>
+   </Pane>
+   <Pane prefHeight="320.0" prefWidth="191.0" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="0.0"
+         AnchorPane.rightAnchor="400.0" AnchorPane.topAnchor="0.0">
+      <ListView fx:id="chatsList" prefHeight="360.0" prefWidth="200.0"/>
+   </Pane>
+   <Pane layoutX="200.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="40.0"
+         AnchorPane.leftAnchor="200.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <ListView fx:id="chatArea" prefHeight="360.0" prefWidth="400.0"/>
+   </Pane>
 </AnchorPane>

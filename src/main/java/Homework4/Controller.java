@@ -2,18 +2,16 @@ package Homework4;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableListBase;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 
 public class Controller {
 
@@ -28,6 +26,8 @@ public class Controller {
 
 
     public void initialize() {
+
+        //Введеные вручную данные для проверки работы, от этого блока впоследствии надо избавиться
         ObservableList<Contact> contacts = FXCollections.observableArrayList(
                 new Contact("Mama"),
                 new Contact("Papa"),
@@ -41,7 +41,11 @@ public class Controller {
             contactList.add(contact.getName());
         }
 
-        contacts.get(0).addMessage("Привет!");
+        contacts.get(0).addMessage("Привет!", getCurrentDate());
+        contacts.get(1).addMessage("Как дела?", getCurrentDate());
+        contacts.get(2).addMessage("Ты тут?", getCurrentDate());
+        contacts.get(3).addMessage("Дай денег, плз, зарплату задерживают, а мелкой надо штаны зимние купить.", getCurrentDate());
+        //Конец данных инициализации
 
         chatsList.setItems(contactList);
 
@@ -52,25 +56,28 @@ public class Controller {
         chatsList.setOnMouseClicked(event -> chatArea.setItems(contacts.get(getCurrentContactIndex()).getMessages()));
 
         sendButton.setOnAction(event -> {
-            if (userMessage.getText().length() > 0) {
-                contacts.get(getCurrentContactIndex()).addMessage("You", userMessage.getText());
-                userMessage.clear();
-                System.out.println(getCurrentContactIndex());
-            }
+            sendMessage(contacts);
         });
         userMessage.setOnKeyPressed(event -> {
             if (event.getCode().equals(KeyCode.ENTER)) {
-                if (userMessage.getText().length() > 0) {
-                    contacts.get(getCurrentContactIndex()).addMessage("You", userMessage.getText());
-                    userMessage.clear();
-                    System.out.println(getCurrentContactIndex());
-                }
+                sendMessage(contacts);
             }
         });
 
     }
 
+    private void sendMessage(ObservableList<Contact> contacts) {
+        if (userMessage.getText().length() > 0) {
+            contacts.get(getCurrentContactIndex()).addMessage("You", userMessage.getText(), getCurrentDate());
+            userMessage.clear();
+        }
+    }
+
     private int getCurrentContactIndex() {
         return chatsList.getSelectionModel().getSelectedIndex();
+    }
+
+    private String getCurrentDate() {
+        return DateTimeFormatter.ofPattern("dd-MM-yy hh:mm:ss").format(LocalDateTime.now());
     }
 }
