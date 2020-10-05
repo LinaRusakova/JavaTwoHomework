@@ -38,6 +38,6 @@ public class Contact {
     }
 
     private String getCurrentDate() {
-        return DateTimeFormatter.ofPattern("dd-MM-yy hh:mm:ss").format(LocalDateTime.now());
+        return DateTimeFormatter.ofPattern("dd-MM-yy HH:mm:ss").format(LocalDateTime.now());
     }
 }
