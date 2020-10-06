@@ -1,7 +1,6 @@
 package Homework5;
 
 import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class MultiThreadExample {
 
@@ -57,11 +56,7 @@ public class MultiThreadExample {
         thread1.start();
         thread2.start();
 
-//        thread1.join();
-//        Вот этот момент нужно поточнее, можно джоинить только один тред, или все треды? Их джоин означает, что тред мейн (тот тред, из которого был запущен метод) ждет их окончания?
-//        И если указать только один из них, как у меня, то в теории может случится так, что один из тредов не успеет отработать?
-//        Потому что без джойнов так и было, треды просто не дожидались выполнения полного прохода по массивам, при джойне только первого треда тоже второй не дорабатывает до конца, а вот так все в порядке.
-//        Это связано со временем их старта?
+        thread1.join();
         thread2.join();
 
         System.arraycopy(a1, 0, array, 0, HALF);
@@ -106,9 +101,9 @@ public class MultiThreadExample {
         thread3.start();
         thread4.start();
 
-//        thread1.join();
-//        thread2.join();
-//        thread3.join();
+        thread1.join();
+        thread2.join();
+        thread3.join();
         thread4.join();
 
         System.arraycopy(a1, 0, array, 0, HALF / 2);
