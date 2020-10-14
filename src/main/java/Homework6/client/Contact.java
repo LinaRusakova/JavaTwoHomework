@@ -8,10 +8,14 @@ import java.time.format.DateTimeFormatter;
 
 public class Contact {
     private final String name;
+    //    private boolean isOnline;
+//    private String lastMessage;
     private final ObservableList<String> messages;
 
     public Contact(String name) {
         this.name = name;
+//        this.isOnline = true;
+//        this.lastMessage = null;
         messages = FXCollections.observableArrayList();
     }
 
@@ -25,10 +29,12 @@ public class Contact {
 
     public void addMessage(String userName, String message) {
         this.messages.add(String.format("%s (%s):%n%s", userName, getCurrentDate(), message));
+//        this.lastMessage = String.format("%s: %s",userName, message);
     }
 
     public void addMessage(String message) {
         this.messages.add(String.format("%s (%s):%n%s", this.name, getCurrentDate(), message));
+//        this.lastMessage = String.format("%s: %s",this.name, message);
     }
 
     private String getCurrentDate() {

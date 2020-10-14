@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 
 public class EchoServer {
 
@@ -28,14 +29,15 @@ public class EchoServer {
                     break;
                 }
 
-                out.writeUTF(message);
+                out.writeUTF(message + " (сообщение отправлено через сервер)");
             }
 
             System.out.println("Server has been closed.");
 
+        } catch (SocketException e) {
+            System.err.println("Connection reset");
         } catch (IOException e) {
             System.err.println("Server port is already opened!");
-            e.printStackTrace();
         }
     }
 

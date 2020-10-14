@@ -52,7 +52,7 @@ public class Network {
             try {
                 while (true) {
                     String message = inputStream.readUTF();
-                    controller.appendMessage("Server: " + message);
+                    controller.appendMessage(message);
                 }
             } catch (IOException e) {
                 e.printStackTrace();

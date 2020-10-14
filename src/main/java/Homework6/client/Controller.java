@@ -1,5 +1,6 @@
 package Homework6.client;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -52,11 +53,11 @@ public class Controller {
         chatsList.getSelectionModel().selectFirst();
 
         chatArea.setItems(contacts.get(getCurrentContactIndex()).getMessages());
-//        focusLastMessage();
+        focusLastMessage();
 
         chatsList.setOnMouseClicked(event -> {
             chatArea.setItems(contacts.get(getCurrentContactIndex()).getMessages());
-//            focusLastMessage();
+            focusLastMessage();
         });
 
         sendButton.setOnAction(event -> {
@@ -97,6 +98,7 @@ public class Controller {
     }
 
     public void appendMessage(String message) {
-        contacts.get(getCurrentContactIndex()).addMessage("You", message);
+        Platform.runLater(() -> contacts.get(getCurrentContactIndex()).addMessage("You", message));
+
     }
 }
