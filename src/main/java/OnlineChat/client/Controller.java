@@ -1,4 +1,4 @@
-package Homework6.client;
+package OnlineChat.client;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -60,9 +60,7 @@ public class Controller {
             focusLastMessage();
         });
 
-        sendButton.setOnAction(event -> {
-            sendMessage();
-        });
+        sendButton.setOnAction(event -> sendMessage());
 
         userMessage.setOnKeyPressed(event -> {
             if (event.getCode().equals(KeyCode.ENTER)) {

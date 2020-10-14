@@ -1,4 +1,4 @@
-package Homework6.server;
+package OnlineChat.server;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

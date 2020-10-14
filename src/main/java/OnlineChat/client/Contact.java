@@ -1,4 +1,4 @@
-package Homework6.client;
+package OnlineChat.client;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
