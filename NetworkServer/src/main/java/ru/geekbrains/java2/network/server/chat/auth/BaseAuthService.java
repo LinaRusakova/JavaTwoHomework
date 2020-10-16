@@ -6,12 +6,6 @@ import java.util.List;
 
 public class BaseAuthService implements AuthService {
 
-//    private static final Map<String, String> CREDENTIALS = new HashMap<>() {{
-//        put("login1", "pass1");
-//        put("login2", "pass2");
-//        put("login3", "pass3");
-//    }};
-
     private static final List<User> USERS = List.of(
       new User("login1", "pass1", "Oleg"),
       new User("login2", "pass2", "Alexey"),

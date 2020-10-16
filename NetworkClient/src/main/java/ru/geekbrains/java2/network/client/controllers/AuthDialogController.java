@@ -1,6 +1,5 @@
 package ru.geekbrains.java2.network.client.controllers;
 
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
@@ -17,7 +16,7 @@ public class AuthDialogController {
     private NetworkChatClient clientApp;
 
     @FXML
-    public void executeAuth(ActionEvent actionEvent) {
+    public void executeAuth() {
         String login = loginField.getText();
         String password = passwordField.getText();
         if (login == null || login.isBlank() || password == null || password.isBlank()) {

@@ -12,7 +12,6 @@ public class Network {
 
     private static final String AUTH_CMD_PREFIX = "/auth";
     private static final String AUTHOK_CMD_PREFIX = "/authok";
-    private static final String AUTHERR_CMD_PREFIX = "/autherr";
     private static final String PRIVATE_MSG_CMD_PREFIX = "/w";
     private static final String CLIENT_MSG_CMD_PREFIX = "/clientMsg";
     private static final String SERVER_MSG_CMD_PREFIX = "/serverMsg";
@@ -66,12 +65,12 @@ public class Network {
     }
 
     public void sendMessage(String message) throws IOException {
-        outputStream.writeUTF(message);
+        outputStream.writeUTF(String.format("%s %s %s", CLIENT_MSG_CMD_PREFIX, username, message));
     }
 
     public void sendPrivateMessage(String message, String recipient) throws IOException {
-        String command = String.format("%s %s %s", PRIVATE_MSG_CMD_PREFIX, recipient, message);
-        sendMessage(command);
+        String command = String.format("%s %s %s %s", PRIVATE_MSG_CMD_PREFIX, recipient, username, message);
+        outputStream.writeUTF(command);
     }
 
     public void waitMessages(ViewController viewController) {
@@ -81,9 +80,13 @@ public class Network {
                     String message = inputStream.readUTF();
                     if (message.startsWith(CLIENT_MSG_CMD_PREFIX)) {
                         String[] parts = message.split("\\s+", 3);
-                        String sender = parts[1];
-                        String msgBody = parts[2];
-                        Platform.runLater(() -> viewController.appendMessage(String.format("%s: %s", sender, msgBody)));
+                        Platform.runLater(() -> viewController.appendMessage(String.format("%s: %s", parts[1], parts[2])));
+                    }
+                    else if (message.startsWith(PRIVATE_MSG_CMD_PREFIX)) {
+                        String[] parts = message.split("\\s+", 4);
+                        if (parts[1].equals(this.username)) {
+                            Platform.runLater(() -> viewController.appendMessage(String.format("%s: %s", parts[2], parts[3])));
+                        }
                     }
                     else if (message.startsWith(SERVER_MSG_CMD_PREFIX)) {
                         String[] parts = message.split("\\s+", 2);

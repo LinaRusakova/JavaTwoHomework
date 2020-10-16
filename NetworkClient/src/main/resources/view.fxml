@@ -20,7 +20,7 @@
                            <children>
                               <HBox alignment="CENTER" maxHeight="-Infinity" prefHeight="30.0" prefWidth="200.0">
                                  <children>
-                                              <Label prefHeight="42.0" text="Чат">
+                                              <Label prefHeight="42.0" text="Messenger">
                                                   <font>
                                                       <Font size="18.0" />
                                                   </font>
@@ -34,7 +34,7 @@
                                     <children>
                               <HBox prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <children>
-                                                  <TextField fx:id="textField" maxHeight="1.7976931348623157E308" promptText="Insert your message here" HBox.hgrow="ALWAYS" />
+                                                  <TextField fx:id="textField" maxHeight="1.7976931348623157E308" promptText="Type your message here" HBox.hgrow="ALWAYS" />
                                                   <Button fx:id="sendButton" maxHeight="1.7976931348623157E308" mnemonicParsing="false" prefWidth="100.0" text="Send" />
                                  </children>
                               </HBox>

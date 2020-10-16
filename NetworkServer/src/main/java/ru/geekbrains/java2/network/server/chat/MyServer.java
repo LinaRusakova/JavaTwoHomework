@@ -59,7 +59,7 @@ public class MyServer {
             if(client == sender) {
                 continue;
             }
-            client.sendMessage(String.format("%s %s" , sender.getUsername(), message));
+            client.sendMessage(message);
         }
     }
 

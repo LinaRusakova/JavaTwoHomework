@@ -11,8 +11,6 @@ public class ClientHandler {
     public static final String AUTH_CMD_PREFIX = "/auth";
     public static final String AUTHOK_CMD_PREFIX = "/authok";
     public static final String AUTHERR_CMD_PREFIX = "/autherr";
-    private static final String PRIVATE_MSG_CMD_PREFIX = "/w";
-    private static final String CLIENT_MSG_CMD_PREFIX = "/clientMsg";
     private static final String SERVER_MSG_CMD_PREFIX = "/serverMsg";
 
     private final MyServer myServer;
@@ -63,11 +61,12 @@ public class ClientHandler {
                 if (username != null) {
                     if (myServer.isUsernameAlreadyTaken(username)) {
                         outputStream.writeUTF(AUTHERR_CMD_PREFIX + " Username already taken. Please choose another one.");
+                    } else {
+                        outputStream.writeUTF(String.format("%s %s", AUTHOK_CMD_PREFIX, username));
+                        myServer.broadcastMessage(String.format("%s %s has come online", SERVER_MSG_CMD_PREFIX, username), this);
+                        myServer.subscribe(this);
+                        break;
                     }
-                    outputStream.writeUTF(String.format("%s %s", AUTHOK_CMD_PREFIX, username));
-                    myServer.broadcastMessage(username + " has come online", this);
-                    myServer.subscribe(this);
-                    break;
                 } else {
                     outputStream.writeUTF(AUTHERR_CMD_PREFIX + " Login and/or password are invalid. Please try again.");
                 }
@@ -81,7 +80,7 @@ public class ClientHandler {
     private void readMessage() throws IOException {
         while (true) {
             String message = inputStream.readUTF();
-            System.out.println("Message: " + message);
+            System.out.printf("Message from %s: %s%n", username, message);
             if (message.startsWith("/end")) {
                 return;
             }
@@ -95,6 +94,6 @@ public class ClientHandler {
     }
 
     public void sendMessage(String message) throws IOException {
-        outputStream.writeUTF(String.format("%s %s", CLIENT_MSG_CMD_PREFIX, message));
+        outputStream.writeUTF(message);
     }
 }
