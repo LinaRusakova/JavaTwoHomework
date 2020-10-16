@@ -92,9 +92,9 @@ public class MultiThreadExample {
         System.arraycopy(array, HALF + HALF / 2, a4, 0, HALF / 2);
 
         Thread thread1 = new Thread(() -> doMath(a1, 0));
-        Thread thread2 = new Thread(() -> doMath(a2, HALF / 2f));
+        Thread thread2 = new Thread(() -> doMath(a2, HALF / 2));
         Thread thread3 = new Thread(() -> doMath(a3, HALF));
-        Thread thread4 = new Thread(() -> doMath(a4, HALF + HALF / 2f));
+        Thread thread4 = new Thread(() -> doMath(a4, HALF + HALF / 2));
 
         thread1.start();
         thread2.start();
@@ -123,9 +123,9 @@ public class MultiThreadExample {
 
     }
 
-    public static void doMath(float[] array, float startIndex) {
+    public static void doMath(float[] array, int startIndex) {
         for (int i = 0; i < array.length; i++) {
-            array[i] = (float) (array[i] * Math.sin(0.2f + (i + startIndex) / 5) * Math.cos(0.2f + (i + startIndex) / 5) * Math.cos(0.4f + (i + startIndex) / 2));
+            array[i] = (float) (array[i] * Math.sin(0.2f + (float)(i + startIndex) / 5) * Math.cos(0.2f + (float)(i + startIndex) / 5) * Math.cos(0.4f + (float)(i + startIndex) / 2));
         }
     }
 }
