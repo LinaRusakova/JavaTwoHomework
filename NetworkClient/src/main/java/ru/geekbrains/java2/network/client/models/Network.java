@@ -1,28 +1,22 @@
 package ru.geekbrains.java2.network.client.models;
 
 import javafx.application.Platform;
+import ru.geekbrains.java2.network.client.NetworkChatClient;
 import ru.geekbrains.java2.network.client.controllers.ViewController;
+import ru.geekbrains.java2.network.clientserver.Command;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 
 public class Network {
-
-    private static final String AUTH_CMD_PREFIX = "/auth";
-    private static final String AUTHOK_CMD_PREFIX = "/authok";
-    private static final String PRIVATE_MSG_CMD_PREFIX = "/w";
-    private static final String CLIENT_MSG_CMD_PREFIX = "/clientMsg";
-    private static final String SERVER_MSG_CMD_PREFIX = "/serverMsg";
 
     private static final String SERVER_ADDRESS = "localhost";
     private static final int SERVER_PORT = 8189;
 
     private final String host;
     private final int port;
-    private DataInputStream inputStream;
-    private DataOutputStream outputStream;
+    private ObjectInputStream inputStream;
+    private ObjectOutputStream outputStream;
     private Socket socket;
     private String username;
 
@@ -38,8 +32,8 @@ public class Network {
     public boolean connect() {
         try {
             socket = new Socket(host, port);
-            inputStream = new DataInputStream(socket.getInputStream());
-            outputStream = new DataOutputStream(socket.getOutputStream());
+            outputStream = new ObjectOutputStream(socket.getOutputStream());
+            inputStream = new ObjectInputStream(socket.getInputStream());
             return true;
         } catch (IOException e) {
             System.err.println("Connection hasn't been established");
@@ -50,14 +44,15 @@ public class Network {
 
     public String sendAuthCommand(String login, String password) {
         try {
-            outputStream.writeUTF(String.format("%s %s %s", AUTH_CMD_PREFIX, login, password));
-            String response = inputStream.readUTF();
-            if (response.startsWith(AUTHOK_CMD_PREFIX)) {
-                this.username = response.split("\\s+", 2)[1];
-                return null;
-            } else {
-                return response.split("\\s+", 2)[1];
+            Command authCommand = Command.authCommand(login, password);
+            outputStream.writeObject(authCommand);
+            Command command = readCommand();
+
+            if (command == null) {
+                NetworkChatClient.showNetworkError("Failed to read command from server.", "");
             }
+
+
         } catch (IOException e) {
             e.printStackTrace();
             return e.getMessage();
@@ -114,5 +109,16 @@ public class Network {
 
     public String getUsername() {
         return username;
+    }
+
+    private Command readCommand() throws IOException {
+        try {
+            return (Command) inputStream.readObject();
+        } catch (ClassNotFoundException e) {
+            String errorMessage = "Unknown type of object from client";
+            System.err.println(errorMessage);
+            e.printStackTrace();
+            return null;
+        }
     }
 }
