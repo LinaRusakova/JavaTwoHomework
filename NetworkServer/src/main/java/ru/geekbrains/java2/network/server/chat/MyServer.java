@@ -1,5 +1,6 @@
 package ru.geekbrains.java2.network.server.chat;
 
+import ru.geekbrains.java2.network.clientserver.Command;
 import ru.geekbrains.java2.network.server.chat.auth.AuthService;
 import ru.geekbrains.java2.network.server.chat.auth.BaseAuthService;
 import ru.geekbrains.java2.network.server.chat.handler.ClientHandler;
@@ -54,30 +55,50 @@ public class MyServer {
         return authService;
     }
 
-    public void broadcastMessage(String message, ClientHandler sender) throws IOException {
+    public void broadcastMessage(ClientHandler sender, Command command) throws IOException {
         for (ClientHandler client : clients) {
-            if(client == sender) {
+            if (client == sender) {
                 continue;
             }
-            client.sendMessage(message);
+            client.sendMessage(command);
         }
     }
 
-    public void subscribe(ClientHandler handler) {
+    public synchronized void subscribe(ClientHandler handler) throws IOException {
         clients.add(handler);
+        List<String> usernames = getAllUsernames();
+        broadcastMessage(null, Command.updateUserListCommand(usernames));
     }
 
-    public void unsubscribe(ClientHandler handler) {
+    public synchronized void unsubscribe(ClientHandler handler) throws IOException {
         clients.remove(handler);
+        List<String> usernames = getAllUsernames();
+        broadcastMessage(null, Command.updateUserListCommand(usernames));
     }
 
-    public boolean isUsernameAlreadyTaken(String username) {
+    private List<String> getAllUsernames() {
+        List<String> usernames = new ArrayList<>();
+        for (ClientHandler client : clients) {
+            usernames.add(client.getUsername());
+        }
+        return usernames;
+    }
+
+    public synchronized boolean isUsernameAlreadyTaken(String username) {
         for (ClientHandler client : clients) {
             if (client.getUsername().equals(username)) {
                 return true;
             }
         }
         return false;
+    }
+
+    public synchronized void sendPrivateMessage(String recipient, Command command) throws IOException {
+        for (ClientHandler client : clients) {
+            if (client.getUsername().equals(recipient)) {
+                client.sendMessage(command);
+            }
+        }
     }
 
 }

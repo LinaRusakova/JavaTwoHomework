@@ -1,28 +1,23 @@
 package ru.geekbrains.java2.network.client.models;
 
 import javafx.application.Platform;
-import ru.geekbrains.java2.network.client.controllers.ViewController;
+import ru.geekbrains.java2.network.client.NetworkChatClient;
+import ru.geekbrains.java2.network.client.controllers.Controller;
+import ru.geekbrains.java2.network.clientserver.Command;
+import ru.geekbrains.java2.network.clientserver.commands.*;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 
 public class Network {
-
-    private static final String AUTH_CMD_PREFIX = "/auth";
-    private static final String AUTHOK_CMD_PREFIX = "/authok";
-    private static final String PRIVATE_MSG_CMD_PREFIX = "/w";
-    private static final String CLIENT_MSG_CMD_PREFIX = "/clientMsg";
-    private static final String SERVER_MSG_CMD_PREFIX = "/serverMsg";
 
     private static final String SERVER_ADDRESS = "localhost";
     private static final int SERVER_PORT = 8189;
 
     private final String host;
     private final int port;
-    private DataInputStream inputStream;
-    private DataOutputStream outputStream;
+    private ObjectInputStream inputStream;
+    private ObjectOutputStream outputStream;
     private Socket socket;
     private String username;
 
@@ -38,8 +33,8 @@ public class Network {
     public boolean connect() {
         try {
             socket = new Socket(host, port);
-            inputStream = new DataInputStream(socket.getInputStream());
-            outputStream = new DataOutputStream(socket.getOutputStream());
+            outputStream = new ObjectOutputStream(socket.getOutputStream());
+            inputStream = new ObjectInputStream(socket.getInputStream());
             return true;
         } catch (IOException e) {
             System.err.println("Connection hasn't been established");
@@ -48,52 +43,68 @@ public class Network {
         }
     }
 
-    public String sendAuthCommand(String login, String password) {
-        try {
-            outputStream.writeUTF(String.format("%s %s %s", AUTH_CMD_PREFIX, login, password));
-            String response = inputStream.readUTF();
-            if (response.startsWith(AUTHOK_CMD_PREFIX)) {
-                this.username = response.split("\\s+", 2)[1];
-                return null;
-            } else {
-                return response.split("\\s+", 2)[1];
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return e.getMessage();
-        }
+    public void sendCommand(Command command) throws IOException {
+        outputStream.writeObject(command);
     }
 
     public void sendMessage(String message) throws IOException {
-        outputStream.writeUTF(String.format("%s %s %s", CLIENT_MSG_CMD_PREFIX, username, message));
+        sendCommand(Command.publicMessageCommand(username, message));
     }
 
     public void sendPrivateMessage(String message, String recipient) throws IOException {
-        String command = String.format("%s %s %s %s", PRIVATE_MSG_CMD_PREFIX, recipient, username, message);
-        outputStream.writeUTF(command);
+        sendCommand(Command.privateMessageCommand(recipient, message));
     }
 
-    public void waitMessages(ViewController viewController) {
+    public void waitMessages(Controller controller) {
         Thread thread = new Thread(() -> {
             try {
                 while (true) {
-                    String message = inputStream.readUTF();
-                    if (message.startsWith(CLIENT_MSG_CMD_PREFIX)) {
-                        String[] parts = message.split("\\s+", 3);
-                        Platform.runLater(() -> viewController.appendMessage(String.format("%s: %s", parts[1], parts[2])));
+                    Command command = readCommand();
+
+                    if (command == null) {
+                        Platform.runLater(() -> NetworkChatClient.showNetworkError("Server error", "Unknown command from server!"));
+                        continue;
                     }
-                    else if (message.startsWith(PRIVATE_MSG_CMD_PREFIX)) {
-                        String[] parts = message.split("\\s+", 4);
-                        if (parts[1].equals(this.username)) {
-                            Platform.runLater(() -> viewController.appendMessage(String.format("%s: %s", parts[2], parts[3])));
+                    switch (command.getType()) {
+                        case AUTH_OK: {
+                            AuthOkCommandData data = (AuthOkCommandData) command.getData();
+                            setUsername(data.getUsername());
+                            Platform.runLater(() -> controller.getClientApp().openChat());
+                            return;
                         }
-                    }
-                    else if (message.startsWith(SERVER_MSG_CMD_PREFIX)) {
-                        String[] parts = message.split("\\s+", 2);
-                        Platform.runLater(() -> viewController.appendMessage(parts[1]));
-                    }
-                    else {
-                        Platform.runLater(() -> viewController.showError("Unknown command from server!", message));
+                        case AUTH_ERROR: {
+                            AuthErrorCommandData data = (AuthErrorCommandData) command.getData();
+                            Platform.runLater(() -> NetworkChatClient.showNetworkError("Server error", data.getErrorMessage()));
+                            break;
+                        }
+                        case AUTH_TIMEOUT: {
+                            AuthTimeoutCommandData data = (AuthTimeoutCommandData) command.getData();
+                            Platform.runLater(() -> NetworkChatClient.showNetworkError("Server error", data.getAuthTimeoutMessage()));
+                            getSocket().close();
+                            break;
+                        }
+                        case INFO_MESSAGE: {
+                            MessageInfoCommandData data = (MessageInfoCommandData) command.getData();
+                            String message = data.getMessage();
+                            String sender = data.getSender();
+                            String formattedMessage = sender != null ? String.format("%s: %s", sender, message) : message;
+                            Platform.runLater(() -> controller.appendMessage(formattedMessage));
+                            break;
+                        }
+                        case UPDATE_USER_LIST: {
+                            UpdateUserListCommandData data = (UpdateUserListCommandData) command.getData();
+                            Platform.runLater(() -> {
+                                controller.updateUserList(data.getUserList());
+                            });
+                            break;
+                        }
+                        case ERROR:
+                            ErrorCommandData data = (ErrorCommandData) command.getData();
+                            String errorMessage = data.getErrorMessage();
+                            Platform.runLater(() -> NetworkChatClient.showNetworkError("Server error", errorMessage));
+                            break;
+                        default:
+                            Platform.runLater(() -> NetworkChatClient.showNetworkError("Unknown command from server!", command.getType().toString()));
                     }
                 }
             } catch (IOException e) {
@@ -114,5 +125,24 @@ public class Network {
 
     public String getUsername() {
         return username;
+    }
+
+    public synchronized Command readCommand() throws IOException {
+        try {
+            return (Command) inputStream.readObject();
+        } catch (ClassNotFoundException e) {
+            String errorMessage = "Unknown type of object from client";
+            System.err.println(errorMessage);
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public Socket getSocket() {
+        return socket;
     }
 }

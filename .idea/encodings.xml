@@ -3,6 +3,8 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/NetworkClient/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/NetworkClient/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/NetworkClientServer/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/NetworkClientServer/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/NetworkServer/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/NetworkServer/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />

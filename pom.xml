@@ -11,6 +11,7 @@
     <modules>
         <module>NetworkServer</module>
         <module>NetworkClient</module>
+        <module>NetworkClientServer</module>
     </modules>
 
     <properties>
