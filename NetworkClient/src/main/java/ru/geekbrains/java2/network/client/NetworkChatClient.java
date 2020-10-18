@@ -70,9 +70,11 @@ public class NetworkChatClient extends Application {
         authDialogStage.show();
 
 
-        AuthDialogController authController = authLoader.getController();
-        authController.setNetwork(network);
-        authController.setClientApp(this);
+        authDialogController = authLoader.getController();
+        authDialogController.setNetwork(network);
+        authDialogController.setClientApp(this);
+
+        network.waitMessages(authDialogController);
     }
 
     public static void showNetworkError(String errorTitle, String errorDetails) {

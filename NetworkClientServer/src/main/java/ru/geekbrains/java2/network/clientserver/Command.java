@@ -39,6 +39,13 @@ public class Command implements Serializable {
         return command;
     }
 
+    public static Command authTimeoutCommand(String authTimeoutMessage) {
+        Command command = new Command();
+        command.type = CommandType.AUTH_TIMEOUT;
+        command.data  = new AuthTimeoutCommandData(authTimeoutMessage);
+        return command;
+    }
+
     public static Command errorCommand(String errorMessage) {
         Command command = new Command();
         command.type = CommandType.ERROR;

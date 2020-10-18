@@ -2,10 +2,8 @@ package ru.geekbrains.java2.network.client.models;
 
 import javafx.application.Platform;
 import ru.geekbrains.java2.network.client.NetworkChatClient;
-import ru.geekbrains.java2.network.client.controllers.AuthDialogController;
-import ru.geekbrains.java2.network.client.controllers.ViewController;
+import ru.geekbrains.java2.network.client.controllers.Controller;
 import ru.geekbrains.java2.network.clientserver.Command;
-import ru.geekbrains.java2.network.clientserver.CommandType;
 import ru.geekbrains.java2.network.clientserver.commands.*;
 
 import java.io.*;
@@ -45,36 +43,7 @@ public class Network {
         }
     }
 
-    public String sendAuthCommand(String login, String password) {
-        try {
-            Command authCommand = Command.authCommand(login, password);
-            outputStream.writeObject(authCommand);
-            Command command = readCommand();
-
-            if (command == null) {
-                return "Failed to read command from server.";
-            }
-
-            switch (command.getType()) {
-                case AUTH_OK: {
-                    AuthOkCommandData data = (AuthOkCommandData) command.getData();
-                    this.username = data.getUsername();
-                    return null;
-                }
-                case AUTH_ERROR: {
-                    AuthErrorCommandData data = (AuthErrorCommandData) command.getData();
-                    return data.getErrorMessage();
-                }
-                default:
-                    return "Unknown command type from server: " + command.getType();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return e.getMessage();
-        }
-    }
-
-    private void sendCommand(Command command) throws IOException {
+    public void sendCommand(Command command) throws IOException {
         outputStream.writeObject(command);
     }
 
@@ -86,7 +55,7 @@ public class Network {
         sendCommand(Command.privateMessageCommand(recipient, message));
     }
 
-    public void waitMessages(ViewController viewController) {
+    public void waitMessages(Controller controller) {
         Thread thread = new Thread(() -> {
             try {
                 while (true) {
@@ -96,20 +65,36 @@ public class Network {
                         Platform.runLater(() -> NetworkChatClient.showNetworkError("Server error", "Unknown command from server!"));
                         continue;
                     }
-
                     switch (command.getType()) {
+                        case AUTH_OK: {
+                            AuthOkCommandData data = (AuthOkCommandData) command.getData();
+                            setUsername(data.getUsername());
+                            Platform.runLater(() -> controller.getClientApp().openChat());
+                            return;
+                        }
+                        case AUTH_ERROR: {
+                            AuthErrorCommandData data = (AuthErrorCommandData) command.getData();
+                            Platform.runLater(() -> NetworkChatClient.showNetworkError("Server error", data.getErrorMessage()));
+                            break;
+                        }
+                        case AUTH_TIMEOUT: {
+                            AuthTimeoutCommandData data = (AuthTimeoutCommandData) command.getData();
+                            Platform.runLater(() -> NetworkChatClient.showNetworkError("Server error", data.getAuthTimeoutMessage()));
+                            getSocket().close();
+                            break;
+                        }
                         case INFO_MESSAGE: {
                             MessageInfoCommandData data = (MessageInfoCommandData) command.getData();
                             String message = data.getMessage();
                             String sender = data.getSender();
                             String formattedMessage = sender != null ? String.format("%s: %s", sender, message) : message;
-                            Platform.runLater(() -> viewController.appendMessage(formattedMessage));
+                            Platform.runLater(() -> controller.appendMessage(formattedMessage));
                             break;
                         }
                         case UPDATE_USER_LIST: {
                             UpdateUserListCommandData data = (UpdateUserListCommandData) command.getData();
                             Platform.runLater(() -> {
-                                viewController.updateUserList(data.getUserList());
+                                controller.updateUserList(data.getUserList());
                             });
                             break;
                         }
@@ -142,7 +127,7 @@ public class Network {
         return username;
     }
 
-    private Command readCommand() throws IOException {
+    public synchronized Command readCommand() throws IOException {
         try {
             return (Command) inputStream.readObject();
         } catch (ClassNotFoundException e) {
@@ -151,5 +136,13 @@ public class Network {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public Socket getSocket() {
+        return socket;
     }
 }

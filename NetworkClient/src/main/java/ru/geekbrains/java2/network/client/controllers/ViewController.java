@@ -12,7 +12,7 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
 
-public class ViewController {
+public class ViewController implements Controller {
 
     @FXML
     public ListView<String> userList;
@@ -78,6 +78,7 @@ public class ViewController {
         this.network = network;
     }
 
+    @Override
     public void appendMessage(String message) {
         String timestamp = DateFormat.getInstance().format(new Date());
         chatHistory.appendText(timestamp);
@@ -89,5 +90,10 @@ public class ViewController {
 
     public void updateUserList(List<String> users) {
         userList.setItems(FXCollections.observableArrayList(users));
+    }
+
+    @Override
+    public NetworkChatClient getClientApp() {
+        return null;
     }
 }

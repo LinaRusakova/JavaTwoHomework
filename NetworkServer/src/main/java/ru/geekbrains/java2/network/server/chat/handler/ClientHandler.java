@@ -15,7 +15,7 @@ import java.util.TimerTask;
 
 public class ClientHandler {
 
-    private final long CONNECTION_TIMEOUT = 10000;
+    private final long CONNECTION_TIMEOUT = 120000;
 
     private final MyServer myServer;
     private final Socket clientSocket;
@@ -38,7 +38,7 @@ public class ClientHandler {
             @Override
             public void run() {
                 try {
-                    sendMessage(Command.authErrorCommand("Connection timeout"));
+                    sendMessage(Command.authTimeoutCommand("Connection timeout"));
                     closeConnection();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -58,6 +58,11 @@ public class ClientHandler {
                 readMessages();
             } catch (SocketException e) {
                 System.err.println("Connection has been interrupted");
+                try {
+                    closeConnection();
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
