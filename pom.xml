@@ -6,7 +6,12 @@
 
     <groupId>ru.geekbrains.javatwo.homework</groupId>
     <artifactId>JavaTwoHomework</artifactId>
+    <packaging>pom</packaging>
     <version>1.0</version>
+    <modules>
+        <module>NetworkServer</module>
+        <module>NetworkClient</module>
+    </modules>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
