@@ -9,9 +9,13 @@ import ru.geekbrains.java2.network.server.chat.MyServer;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Timer;
+import java.util.TimerTask;
 
 public class ClientHandler {
+
+    private final long CONNECTION_TIMEOUT = 10000;
 
     private final MyServer myServer;
     private final Socket clientSocket;
@@ -30,10 +34,30 @@ public class ClientHandler {
         inputStream = new ObjectInputStream(clientSocket.getInputStream());
         outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
 
+        TimerTask timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    sendMessage(Command.authErrorCommand("Connection timeout"));
+                    closeConnection();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        Timer closeConnectionOnTime = new Timer();
+
+        closeConnectionOnTime.schedule(timerTask, CONNECTION_TIMEOUT);
+
         new Thread(() -> {
             try {
                 authentication();
+                if (username != null) {
+                    closeConnectionOnTime.cancel();
+                }
                 readMessages();
+            } catch (SocketException e) {
+                System.err.println("Connection has been interrupted");
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
@@ -123,6 +147,7 @@ public class ClientHandler {
                     String sender = data.getSender();
                     String message = data.getMessage();
                     myServer.broadcastMessage(this, Command.messageInfoCommand(message, sender));
+                    break;
                 }
                 default:
                     System.err.println("Unknown command type from server: " + command.getType());

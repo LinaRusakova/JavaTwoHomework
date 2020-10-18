@@ -24,6 +24,7 @@ public class NetworkChatClient extends Application {
     private Stage authDialogStage;
     private Network network;
     private ViewController viewController;
+    private AuthDialogController authDialogController;
 
 
     @Override
@@ -74,7 +75,7 @@ public class NetworkChatClient extends Application {
         authController.setClientApp(this);
     }
 
-    public static void showNetworkError(String errorDetails, String errorTitle) {
+    public static void showNetworkError(String errorTitle, String errorDetails) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Network Error");
         alert.setHeaderText(errorTitle);

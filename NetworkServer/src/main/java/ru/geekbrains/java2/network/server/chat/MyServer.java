@@ -57,7 +57,7 @@ public class MyServer {
 
     public void broadcastMessage(ClientHandler sender, Command command) throws IOException {
         for (ClientHandler client : clients) {
-            if(client == sender) {
+            if (client == sender) {
                 continue;
             }
             client.sendMessage(command);
@@ -67,13 +67,13 @@ public class MyServer {
     public synchronized void subscribe(ClientHandler handler) throws IOException {
         clients.add(handler);
         List<String> usernames = getAllUsernames();
-        broadcastMessage(null, Command.updateUserList(usernames));
+        broadcastMessage(null, Command.updateUserListCommand(usernames));
     }
 
     public synchronized void unsubscribe(ClientHandler handler) throws IOException {
         clients.remove(handler);
         List<String> usernames = getAllUsernames();
-        broadcastMessage(null, Command.updateUserList(usernames));
+        broadcastMessage(null, Command.updateUserListCommand(usernames));
     }
 
     private List<String> getAllUsernames() {

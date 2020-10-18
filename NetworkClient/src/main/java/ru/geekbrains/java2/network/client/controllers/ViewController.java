@@ -87,10 +87,6 @@ public class ViewController {
         chatHistory.appendText(System.lineSeparator());
     }
 
-    public void showError(String title, String message) {
-        NetworkChatClient.showNetworkError(message, title);
-    }
-
     public void updateUserList(List<String> users) {
         userList.setItems(FXCollections.observableArrayList(users));
     }

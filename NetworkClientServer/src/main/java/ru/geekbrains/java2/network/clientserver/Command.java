@@ -67,7 +67,7 @@ public class Command implements Serializable {
         return command;
     }
 
-    public static Command updateUserList(List<String> users) {
+    public static Command updateUserListCommand(List<String> users) {
         Command command = new Command();
         command.type = CommandType.UPDATE_USER_LIST;
         command.data = new UpdateUserListCommandData(users);

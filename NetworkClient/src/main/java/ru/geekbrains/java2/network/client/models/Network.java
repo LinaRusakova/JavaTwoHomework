@@ -1,8 +1,11 @@
 package ru.geekbrains.java2.network.client.models;
 
 import javafx.application.Platform;
+import ru.geekbrains.java2.network.client.NetworkChatClient;
+import ru.geekbrains.java2.network.client.controllers.AuthDialogController;
 import ru.geekbrains.java2.network.client.controllers.ViewController;
 import ru.geekbrains.java2.network.clientserver.Command;
+import ru.geekbrains.java2.network.clientserver.CommandType;
 import ru.geekbrains.java2.network.clientserver.commands.*;
 
 import java.io.*;
@@ -90,7 +93,7 @@ public class Network {
                     Command command = readCommand();
 
                     if (command == null) {
-                        Platform.runLater(() -> viewController.showError("Server error","Unknown command from server!"));
+                        Platform.runLater(() -> NetworkChatClient.showNetworkError("Server error", "Unknown command from server!"));
                         continue;
                     }
 
@@ -113,10 +116,10 @@ public class Network {
                         case ERROR:
                             ErrorCommandData data = (ErrorCommandData) command.getData();
                             String errorMessage = data.getErrorMessage();
-                            Platform.runLater(() -> viewController.showError("Server error", errorMessage));
+                            Platform.runLater(() -> NetworkChatClient.showNetworkError("Server error", errorMessage));
                             break;
                         default:
-                            Platform.runLater(() -> viewController.showError("Unknown command from server!", command.getType().toString()));
+                            Platform.runLater(() -> NetworkChatClient.showNetworkError("Unknown command from server!", command.getType().toString()));
                     }
                 }
             } catch (IOException e) {
