@@ -10,11 +10,12 @@ import ru.geekbrains.java2.network.client.models.Network;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.List;
 
 public class ViewController {
 
     @FXML
-    public ListView<String> usersList;
+    public ListView<String> userList;
 
     @FXML
     private Button sendButton;
@@ -28,16 +29,16 @@ public class ViewController {
 
     @FXML
     public void initialize() {
-        usersList.setItems(FXCollections.observableArrayList(NetworkChatClient.USERS_TEST_DATA));
+        userList.setItems(FXCollections.observableArrayList(NetworkChatClient.USERS_TEST_DATA));
         sendButton.setOnAction(event -> sendMessage());
         textField.setOnAction(event -> sendMessage());
 
-        usersList.setCellFactory(lv -> {
-            MultipleSelectionModel<String> selectionModel = usersList.getSelectionModel();
+        userList.setCellFactory(lv -> {
+            MultipleSelectionModel<String> selectionModel = userList.getSelectionModel();
             ListCell<String> cell = new ListCell<>();
             cell.textProperty().bind(cell.itemProperty());
             cell.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
-                usersList.requestFocus();
+                userList.requestFocus();
                 if (! cell.isEmpty()) {
                     int index = cell.getIndex();
                     if (selectionModel.getSelectedIndices().contains(index)) {
@@ -88,5 +89,9 @@ public class ViewController {
 
     public void showError(String title, String message) {
         NetworkChatClient.showNetworkError(message, title);
+    }
+
+    public void updateUserList(List<String> users) {
+        userList.setItems(FXCollections.observableArrayList(users));
     }
 }

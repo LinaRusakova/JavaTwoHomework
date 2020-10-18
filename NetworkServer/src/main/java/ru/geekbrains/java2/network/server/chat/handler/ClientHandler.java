@@ -9,6 +9,7 @@ import ru.geekbrains.java2.network.server.chat.MyServer;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Timer;
 
 public class ClientHandler {
 
@@ -53,7 +54,7 @@ public class ClientHandler {
         try {
             return (Command) inputStream.readObject();
         } catch (ClassNotFoundException e) {
-            String errorMessage = "Unknown type of object from client";
+            String errorMessage = "Unknown type object type from client";
             System.err.println(errorMessage);
             e.printStackTrace();
             sendMessage(Command.errorCommand(errorMessage));
@@ -67,14 +68,13 @@ public class ClientHandler {
             if (command == null) {
                 continue;
             }
-
             if (command.getType() == CommandType.AUTH) {
                 boolean isSuccessAuth = processAuthCommand(command);
                 if (isSuccessAuth) {
                     break;
-                } else {
-                    sendMessage(Command.authErrorCommand("Auth command is required."));
                 }
+            } else {
+                sendMessage(Command.authErrorCommand("Auth command is required."));
             }
         }
     }
@@ -88,13 +88,13 @@ public class ClientHandler {
             if (myServer.isUsernameAlreadyTaken(username)) {
                 sendMessage(Command.authErrorCommand("Username already taken. Please choose another one."));
                 return false;
-            } else {
-                sendMessage(Command.authOkCommand(username));
-                String message = username + " has come online.";
-                myServer.broadcastMessage(this, Command.messageInfoCommand(message, null));
-                myServer.subscribe(this);
-                return true;
             }
+            sendMessage(Command.authOkCommand(username));
+            String message = username + " has come online.";
+            myServer.broadcastMessage(this, Command.messageInfoCommand(message, null));
+            myServer.subscribe(this);
+            return true;
+
         } else {
             sendMessage(Command.authErrorCommand("Login and/or password are invalid. Please try again."));
             return false;
@@ -125,7 +125,7 @@ public class ClientHandler {
                     myServer.broadcastMessage(this, Command.messageInfoCommand(message, sender));
                 }
                 default:
-                    System.err.println("Unknown type of command: " + command.getType());
+                    System.err.println("Unknown command type from server: " + command.getType());
             }
         }
     }

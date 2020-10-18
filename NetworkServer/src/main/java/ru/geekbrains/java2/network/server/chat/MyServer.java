@@ -64,12 +64,24 @@ public class MyServer {
         }
     }
 
-    public synchronized void subscribe(ClientHandler handler) {
+    public synchronized void subscribe(ClientHandler handler) throws IOException {
         clients.add(handler);
+        List<String> usernames = getAllUsernames();
+        broadcastMessage(null, Command.updateUserList(usernames));
     }
 
-    public synchronized void unsubscribe(ClientHandler handler) {
+    public synchronized void unsubscribe(ClientHandler handler) throws IOException {
         clients.remove(handler);
+        List<String> usernames = getAllUsernames();
+        broadcastMessage(null, Command.updateUserList(usernames));
+    }
+
+    private List<String> getAllUsernames() {
+        List<String> usernames = new ArrayList<>();
+        for (ClientHandler client : clients) {
+            usernames.add(client.getUsername());
+        }
+        return usernames;
     }
 
     public synchronized boolean isUsernameAlreadyTaken(String username) {

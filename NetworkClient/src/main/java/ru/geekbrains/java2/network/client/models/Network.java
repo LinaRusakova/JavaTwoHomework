@@ -1,9 +1,9 @@
 package ru.geekbrains.java2.network.client.models;
 
 import javafx.application.Platform;
-import ru.geekbrains.java2.network.client.NetworkChatClient;
 import ru.geekbrains.java2.network.client.controllers.ViewController;
 import ru.geekbrains.java2.network.clientserver.Command;
+import ru.geekbrains.java2.network.clientserver.commands.*;
 
 import java.io.*;
 import java.net.Socket;
@@ -49,46 +49,74 @@ public class Network {
             Command command = readCommand();
 
             if (command == null) {
-                NetworkChatClient.showNetworkError("Failed to read command from server.", "");
+                return "Failed to read command from server.";
             }
 
-
+            switch (command.getType()) {
+                case AUTH_OK: {
+                    AuthOkCommandData data = (AuthOkCommandData) command.getData();
+                    this.username = data.getUsername();
+                    return null;
+                }
+                case AUTH_ERROR: {
+                    AuthErrorCommandData data = (AuthErrorCommandData) command.getData();
+                    return data.getErrorMessage();
+                }
+                default:
+                    return "Unknown command type from server: " + command.getType();
+            }
         } catch (IOException e) {
             e.printStackTrace();
             return e.getMessage();
         }
     }
 
+    private void sendCommand(Command command) throws IOException {
+        outputStream.writeObject(command);
+    }
+
     public void sendMessage(String message) throws IOException {
-        outputStream.writeUTF(String.format("%s %s %s", CLIENT_MSG_CMD_PREFIX, username, message));
+        sendCommand(Command.publicMessageCommand(username, message));
     }
 
     public void sendPrivateMessage(String message, String recipient) throws IOException {
-        String command = String.format("%s %s %s %s", PRIVATE_MSG_CMD_PREFIX, recipient, username, message);
-        outputStream.writeUTF(command);
+        sendCommand(Command.privateMessageCommand(recipient, message));
     }
 
     public void waitMessages(ViewController viewController) {
         Thread thread = new Thread(() -> {
             try {
                 while (true) {
-                    String message = inputStream.readUTF();
-                    if (message.startsWith(CLIENT_MSG_CMD_PREFIX)) {
-                        String[] parts = message.split("\\s+", 3);
-                        Platform.runLater(() -> viewController.appendMessage(String.format("%s: %s", parts[1], parts[2])));
+                    Command command = readCommand();
+
+                    if (command == null) {
+                        Platform.runLater(() -> viewController.showError("Server error","Unknown command from server!"));
+                        continue;
                     }
-                    else if (message.startsWith(PRIVATE_MSG_CMD_PREFIX)) {
-                        String[] parts = message.split("\\s+", 4);
-                        if (parts[1].equals(this.username)) {
-                            Platform.runLater(() -> viewController.appendMessage(String.format("%s: %s", parts[2], parts[3])));
+
+                    switch (command.getType()) {
+                        case INFO_MESSAGE: {
+                            MessageInfoCommandData data = (MessageInfoCommandData) command.getData();
+                            String message = data.getMessage();
+                            String sender = data.getSender();
+                            String formattedMessage = sender != null ? String.format("%s: %s", sender, message) : message;
+                            Platform.runLater(() -> viewController.appendMessage(formattedMessage));
+                            break;
                         }
-                    }
-                    else if (message.startsWith(SERVER_MSG_CMD_PREFIX)) {
-                        String[] parts = message.split("\\s+", 2);
-                        Platform.runLater(() -> viewController.appendMessage(parts[1]));
-                    }
-                    else {
-                        Platform.runLater(() -> viewController.showError("Unknown command from server!", message));
+                        case UPDATE_USER_LIST: {
+                            UpdateUserListCommandData data = (UpdateUserListCommandData) command.getData();
+                            Platform.runLater(() -> {
+                                viewController.updateUserList(data.getUserList());
+                            });
+                            break;
+                        }
+                        case ERROR:
+                            ErrorCommandData data = (ErrorCommandData) command.getData();
+                            String errorMessage = data.getErrorMessage();
+                            Platform.runLater(() -> viewController.showError("Server error", errorMessage));
+                            break;
+                        default:
+                            Platform.runLater(() -> viewController.showError("Unknown command from server!", command.getType().toString()));
                     }
                 }
             } catch (IOException e) {
